@@ -29,8 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const TILE_SIZE = 10; // Ukuran dasar elemen game (ular, buah)
     const NORMAL_SPEED = 1.5; 
     const BOOST_SPEED = 4.5; 
-    const MAX_FOOD = 20000; // Jumlah buah (disesuaikan agar lebih banyak)
-    const NPC_COUNT = 2000; // Jumlah NPC (disesuaikan agar lebih banyak)
+    const MAX_FOOD = 10000; // Jumlah buah (disesuaikan agar lebih banyak)
+    const NPC_COUNT = 1000; // Jumlah NPC (disesuaikan agar lebih banyak)
     const FOOD_SIZE = TILE_SIZE * 2; // Ukuran buah agar lebih terlihat
 
     // Data Game
