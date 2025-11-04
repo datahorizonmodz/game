@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const SPECIAL_FRUIT_TYPE = 'grape';
 
 
-    // --- Kelas Game (Snake) --- (Tidak ada perubahan signifikan di sini)
+    // --- Kelas Game (Snake) --- 
     class Snake {
         constructor(x, y, color, isPlayer = false, initialLength = 100) {
             this.x = x;
@@ -155,23 +155,126 @@ document.addEventListener('DOMContentLoaded', () => {
             const offsetX = -cameraX;
             const offsetY = -cameraY;
 
+            // Dapatkan posisi Kepala
+            const head = this.segments[this.segments.length - 1];
+            const headX = head.x + offsetX;
+            const headY = head.y + offsetY;
+            
+            // Dapatkan posisi Ekor
+            const tail = this.segments[0];
+            const tailX = tail.x + offsetX;
+            const tailY = tail.y + offsetY;
+
+
+            // 1. Gambar Tubuh Ular
             ctx.beginPath();
             ctx.strokeStyle = this.color;
             ctx.lineWidth = TILE_SIZE;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
-            ctx.moveTo(this.segments[0].x + offsetX, this.segments[0].y + offsetY);
+            // Garis tubuh
+            ctx.moveTo(tailX, tailY);
             for (let i = 1; i < this.segments.length; i++) {
                 ctx.lineTo(this.segments[i].x + offsetX, this.segments[i].y + offsetY);
             }
             ctx.stroke();
 
-            const head = this.segments[this.segments.length - 1];
+            
+            // 2. Implementasi Ekor Lancip (Hanya untuk segmen terakhir/terdepan)
+            if (this.segments.length > 1) {
+                const secondToLast = this.segments[1];
+                const dx = tailX - (secondToLast.x + offsetX);
+                const dy = tailY - (secondToLast.y + offsetY);
+                const angleTail = Math.atan2(dy, dx); // Arah ekor
+
+                ctx.save();
+                ctx.translate(tailX, tailY);
+                ctx.rotate(angleTail);
+
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                // Buat segitiga yang meruncing ke belakang
+                ctx.moveTo(TILE_SIZE / 2, 0); // Puncak
+                ctx.lineTo(-TILE_SIZE * 0.5, TILE_SIZE / 2); // Kaki bawah
+                ctx.lineTo(-TILE_SIZE * 0.5, -TILE_SIZE / 2); // Kaki atas
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.restore();
+            }
+
+
+            // 3. Gambar Kepala (Di atas tubuh)
             ctx.fillStyle = this.color;
             ctx.beginPath();
-            ctx.arc(head.x + offsetX, head.y + offsetY, TILE_SIZE / 2, 0, Math.PI * 2);
+            ctx.arc(headX, headY, TILE_SIZE / 2, 0, Math.PI * 2);
             ctx.fill();
+
+
+            // 4. Detail Visual (Hanya untuk Ular Pemain)
+            if (this.isPlayer) {
+                
+                // --- Mata ---
+                const eyeRadius = TILE_SIZE * 0.15;
+                const pupilRadius = TILE_SIZE * 0.08;
+                const eyeOffset = TILE_SIZE * 0.25; // Jarak dari pusat kepala
+
+                // Mata Putih (Offset ke samping dan depan)
+                // Sudut tegak lurus dari arah gerak (+/- Math.PI / 2)
+                const perpAngle = this.angle + Math.PI / 2; 
+
+                // Mata Kiri
+                const eye1X = headX + Math.cos(perpAngle) * eyeOffset;
+                const eye1Y = headY + Math.sin(perpAngle) * eyeOffset;
+                // Mata Kanan
+                const eye2X = headX + Math.cos(perpAngle - Math.PI) * eyeOffset; // Sudut berlawanan
+                const eye2Y = headY + Math.sin(perpAngle - Math.PI) * eyeOffset; 
+
+                // Gambar Mata Putih
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(eye1X, eye1Y, eyeRadius, 0, Math.PI * 2);
+                ctx.arc(eye2X, eye2Y, eyeRadius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Gambar Pupil Hitam (di tengah mata putih)
+                ctx.fillStyle = 'black';
+                ctx.beginPath();
+                ctx.arc(eye1X, eye1Y, pupilRadius, 0, Math.PI * 2);
+                ctx.arc(eye2X, eye2Y, pupilRadius, 0, Math.PI * 2);
+                ctx.fill();
+
+
+                // --- Lidah ---
+                const time = Date.now() / 100; // Untuk animasi
+                const tongueLength = TILE_SIZE * 1.5;
+                const tongueSpread = TILE_SIZE * 0.25;
+                const tongueMovement = (Math.sin(time) > 0) ? TILE_SIZE * 0.1 : 0; // Lidah menjulur/masuk
+
+                const tongueBaseX = headX + Math.cos(this.angle) * (TILE_SIZE / 2); // Pangkal lidah
+                const tongueBaseY = headY + Math.sin(this.angle) * (TILE_SIZE / 2);
+
+                const tongueTipX = tongueBaseX + Math.cos(this.angle) * (tongueLength + tongueMovement);
+                const tongueTipY = tongueBaseY + Math.sin(this.angle) * (tongueLength + tongueMovement);
+
+                ctx.fillStyle = 'red';
+                ctx.beginPath();
+                // Garis dari pangkal ke ujung garpu kanan
+                ctx.moveTo(tongueBaseX, tongueBaseY);
+                ctx.lineTo(
+                    tongueTipX + Math.cos(perpAngle) * tongueSpread, 
+                    tongueTipY + Math.sin(perpAngle) * tongueSpread
+                );
+                // Garis ke ujung garpu kiri
+                ctx.lineTo(
+                    tongueTipX + Math.cos(perpAngle - Math.PI) * tongueSpread, 
+                    tongueTipY + Math.sin(perpAngle - Math.PI) * tongueSpread
+                );
+                // Garis kembali ke pangkal
+                ctx.closePath();
+                ctx.fill();
+            }
         }
 
         grow(amount) {
@@ -442,6 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // Gambar NPC dan Ular Pemain (memanggil draw() yang sudah dimodifikasi)
         npcSNAKES.forEach(npc => npc.draw(cameraX, cameraY));
 
         if (playerSnake.isAlive) {
