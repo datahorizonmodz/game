@@ -29,8 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const TILE_SIZE = 10;
     const NORMAL_SPEED = 1.5; // Kecepatan normal (dikurangi)
     const BOOST_SPEED = 4.5; // Kecepatan boost
-    const MAX_FOOD = 500; // Lebih banyak makanan untuk map besar
-    const NPC_COUNT = 50; 
+    const MAX_FOOD = 5000; // Lebih banyak makanan untuk map besar
+    const NPC_COUNT = 500; 
 
     // Data Game
     let gameState = 'start';
