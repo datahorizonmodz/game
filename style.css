@@ -1,0 +1,207 @@
+:root {
+    --primary-color: #3f51b5;
+    --secondary-color: #ff9800;
+    --canvas-bg: #f0f0f0;
+}
+
+/* Reset dan Dasar */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Penting untuk game fullscreen */
+    background-color: #222;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Canvas dan Container Game */
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+
+#game-canvas {
+    display: block;
+    background-color: var(--canvas-bg);
+    width: 100%;
+    height: 100%;
+}
+
+/* Layar Awal dan Game Over */
+#start-screen, #game-over-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+}
+
+.card {
+    background: #fff;
+    color: #333;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    max-width: 90%;
+}
+
+.card h1, .card h2 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.card p {
+    margin-bottom: 20px;
+}
+
+.card label {
+    display: block;
+    text-align: left;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.card input[type="text"], .card input[type="color"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.card input[type="color"] {
+    height: 40px;
+}
+
+.card button {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%;
+    font-weight: bold;
+}
+
+.card button:hover {
+    background-color: #e68900;
+}
+
+/* Leaderboard */
+#leaderboard {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+    text-align: left;
+}
+
+#leaderboard li {
+    background: #eee;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+}
+
+#leaderboard li:first-child {
+    background-color: gold;
+}
+
+#leaderboard li.player-score {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+
+/* UI Game (Skor) */
+#game-ui {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+    z-index: 50;
+}
+
+
+/* Joystick Virtual */
+#joystick-region {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 150px; /* Ukuran area touch */
+    height: 150px;
+    z-index: 60;
+}
+
+#joystick-base {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#joystick-handle {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    transition: all 0.05s linear; /* Untuk responsifitas pergerakan */
+}
+
+/* Responsifitas untuk Layar Kecil */
+@media (max-width: 600px) {
+    #joystick-region {
+        width: 120px;
+        height: 120px;
+        bottom: 15px;
+        left: 15px;
+    }
+    #joystick-base {
+        width: 80px;
+        height: 80px;
+    }
+    #joystick-handle {
+        width: 30px;
+        height: 30px;
+    }
+}
