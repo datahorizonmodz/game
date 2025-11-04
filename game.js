@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameOverScreen = document.getElementById('game-over-screen');
     const playButton = document.getElementById('play-button');
     const restartButton = document.getElementById('restart-button');
-    const homeButton = document.getElementById('home-button'); // Tombol HOME baru
-    const boostButton = document.getElementById('boost-button'); // Tombol BOOST baru
+    const homeButton = document.getElementById('home-button');
+    const boostButton = document.getElementById('boost-button');
     const usernameInput = document.getElementById('username-input');
     const colorPicker = document.getElementById('color-picker');
     const scoreDisplay = document.getElementById('score-display');
@@ -24,13 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const joystickHandle = document.getElementById('joystick-handle');
 
     // --- Konfigurasi Game Baru ---
-    const MAP_WIDTH = 5000; // Peta besar (5000x5000 piksel)
+    const MAP_WIDTH = 5000; 
     const MAP_HEIGHT = 5000;
-    const TILE_SIZE = 10;
-    const NORMAL_SPEED = 1.5; // Kecepatan normal (dikurangi)
-    const BOOST_SPEED = 4.5; // Kecepatan boost
-    const MAX_FOOD = 10000; // Lebih banyak makanan untuk map besar
-    const NPC_COUNT = 1000; 
+    const TILE_SIZE = 10; // Ukuran dasar elemen game (ular, buah)
+    const NORMAL_SPEED = 1.5; 
+    const BOOST_SPEED = 4.5; 
+    const MAX_FOOD = 20000; // Jumlah buah (disesuaikan agar lebih banyak)
+    const NPC_COUNT = 2000; // Jumlah NPC (disesuaikan agar lebih banyak)
+    const FOOD_SIZE = TILE_SIZE * 2; // Ukuran buah agar lebih terlihat
 
     // Data Game
     let gameState = 'start';
@@ -38,8 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let playerColor = '#00FF00';
     let score = 0;
     let animationFrameId;
-    let cameraX = 0; // Posisi kamera (offset X)
-    let cameraY = 0; // Posisi kamera (offset Y)
+    let cameraX = 0;
+    let cameraY = 0;
 
     // Objek Game
     let playerSnake;
@@ -59,7 +60,21 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Kira', score: 2600 }
     ];
 
-    // Dummy Image URLs (untuk buah)
+    // --- Link Gambar Dummy Buah ---
+    const fruitImages = {
+        apple: new Image(),
+        banana: new Image(),
+        strawberry: new Image()
+    };
+    fruitImages.apple.src = 'https://i.imgur.com/kS55l1s.png'; // Contoh: Apple (ukuran kecil)
+    fruitImages.banana.src = 'https://i.imgur.com/c6B19G0.png'; // Contoh: Banana
+    fruitImages.strawberry.src = 'https://i.imgur.com/lM3N2f1.png'; // Contoh: Strawberry
+
+    // Jika link di atas tidak bekerja, coba link dummy lain dari placeholder:
+    // fruitImages.apple.src = 'https://via.placeholder.com/30/FF0000/FFFFFF?text=🍎';
+    // fruitImages.banana.src = 'https://via.placeholder.com/30/FFFF00/000000?text=🍌';
+    // fruitImages.strawberry.src = 'https://via.placeholder.com/30/FF4500/FFFFFF?text=🍓';
+    
     const fruitTypes = ['apple', 'banana', 'strawberry'];
 
     // --- Kelas Game (Snake) ---
@@ -75,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.speed = isPlayer ? NORMAL_SPEED : NORMAL_SPEED * 0.8;
             this.isAlive = true;
             this.length = initialLength;
-            this.isBoosting = false; // Hanya untuk player
+            this.isBoosting = false;
             this.segments.push({ x: x, y: y });
 
             if (!isPlayer) {
@@ -91,16 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
         update() {
             if (!this.isAlive) return;
 
-            // Update kecepatan untuk pemain (termasuk boost)
             if (this.isPlayer) {
                 this.speed = this.isBoosting ? BOOST_SPEED : NORMAL_SPEED;
             }
 
-            // Update arah dari angle
             this.direction.x = Math.cos(this.angle) * this.speed;
             this.direction.y = Math.sin(this.angle) * this.speed;
 
-            // Gerak
             this.x += this.direction.x;
             this.y += this.direction.y;
 
@@ -113,42 +125,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Tambahkan kepala baru
             this.segments.push({ x: this.x, y: this.y });
 
-            // Hapus ekor lama untuk menjaga panjang
             while (this.segments.length > this.length) {
                 this.segments.shift();
             }
 
-            // NPC Logic: Random turn (simpel)
             if (!this.isPlayer && Math.random() < 0.02) {
-                this.angle += (Math.random() - 0.5) * 0.5; // Belok sedikit
+                this.angle += (Math.random() - 0.5) * 0.5;
             }
         }
 
         draw(cameraX, cameraY) {
             if (!this.isAlive) return;
 
-            // Offset koordinat dengan kamera
             const offsetX = -cameraX;
             const offsetY = -cameraY;
 
-            // Gambar tubuh
             ctx.beginPath();
             ctx.strokeStyle = this.color;
             ctx.lineWidth = TILE_SIZE;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
-            // Garis tubuh (diaplikasikan offset kamera)
             ctx.moveTo(this.segments[0].x + offsetX, this.segments[0].y + offsetY);
             for (let i = 1; i < this.segments.length; i++) {
                 ctx.lineTo(this.segments[i].x + offsetX, this.segments[i].y + offsetY);
             }
             ctx.stroke();
 
-            // Gambar kepala (di segmen terakhir)
             const head = this.segments[this.segments.length - 1];
             ctx.fillStyle = this.color;
             ctx.beginPath();
@@ -160,15 +165,13 @@ document.addEventListener('DOMContentLoaded', () => {
             this.length += amount;
         }
 
-        // Cek tabrakan dengan titik lain (untuk buah atau kepala ular lain)
-        checkCollision(point) {
+        checkCollision(point, radius = TILE_SIZE / 2) { // Tambah radius untuk cek tabrakan
             const head = this.segments[this.segments.length - 1];
             const dx = head.x - point.x;
             const dy = head.y - point.y;
-            return Math.sqrt(dx * dx + dy * dy) < TILE_SIZE;
+            return Math.sqrt(dx * dx + dy * dy) < TILE_SIZE + radius; // Ukuran tabrakan disesuaikan
         }
 
-        // Cek tabrakan dengan tubuh ular lain (termasuk dirinya)
         checkBodyCollision(otherSnake, isSelfCollision = false) {
             const head = this.segments[this.segments.length - 1];
             const startIndex = isSelfCollision ? Math.floor(this.length * 0.7) : 0; 
@@ -193,7 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.height = window.innerHeight;
     }
 
-    // Mendapatkan posisi pusat joystick secara dinamis (penting untuk mobile)
     function getJoystickCenter() {
         const rect = joystickBase.getBoundingClientRect();
         return {
@@ -233,28 +235,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startGame() {
-        // Setup state
         gameState = 'playing';
         playerName = usernameInput.value || 'Pemain';
         playerColor = colorPicker.value;
         score = 0;
 
-        // Setup UI
         startScreen.style.display = 'none';
         gameContainer.style.display = 'block';
         gameOverScreen.style.display = 'none';
         playerNameDisplay.textContent = playerName;
         resizeCanvas();
 
-        // Inisialisasi Game
-        // Posisikan pemain di tengah map
         playerSnake = new Snake(MAP_WIDTH / 2, MAP_HEIGHT / 2, playerColor, true, 100);
         
         foods = [];
         spawnFood(MAX_FOOD);
         spawnNpcSnakes();
 
-        // Mulai Loop Game
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
         }
@@ -262,17 +259,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function gameOver() {
-        if (gameState !== 'playing') return; // Cegah double game over
+        if (gameState !== 'playing') return;
         
         gameState = 'gameover';
         
-        // Update Leaderboard
         const playerScoreEntry = { name: playerName, score: score };
-        const finalLeaderboard = [...leaderboardData.filter(item => item.name !== playerName), playerScoreEntry] // Hapus duplikat nama pemain
+        const finalLeaderboard = [...leaderboardData.filter(item => item.name !== playerName), playerScoreEntry]
             .sort((a, b) => b.score - a.score)
             .slice(0, 5); 
         
-        // Render Leaderboard
         leaderboardList.innerHTML = '';
         finalLeaderboard.forEach((item, index) => {
             const li = document.createElement('li');
@@ -283,7 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
             leaderboardList.appendChild(li);
         });
 
-        // Tampilkan layar Game Over
         finalScoreDisplay.textContent = score;
         gameOverScreen.style.display = 'flex';
 
@@ -293,12 +287,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function spawnNewNpc(npc) {
-        // NPC mati, spawn yang baru setelah delay 5 detik
         setTimeout(() => {
             const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
             const x = Math.random() * MAP_WIDTH;
             const y = Math.random() * MAP_HEIGHT;
-            // Ganti NPC yang mati dengan yang baru
             const index = npcSNAKES.indexOf(npc);
             if (index !== -1) {
                  npcSNAKES[index] = new Snake(x, y, randomColor, false, 50 + Math.random() * 50);
@@ -309,15 +301,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Loop Game ---
 
     function updateCamera() {
-        // Kamera berpusat pada pemain
         let targetX = playerSnake.x - canvas.width / 2;
         let targetY = playerSnake.y - canvas.height / 2;
 
-        // Batasi kamera agar border peta selalu terlihat
         targetX = Math.max(0, Math.min(targetX, MAP_WIDTH - canvas.width));
         targetY = Math.max(0, Math.min(targetY, MAP_HEIGHT - canvas.height));
 
-        // Animasi halus pergerakan kamera (optional)
         const smoothing = 0.1;
         cameraX += (targetX - cameraX) * smoothing;
         cameraY += (targetY - cameraY) * smoothing;
@@ -326,18 +315,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function update() {
         if (gameState !== 'playing' || !playerSnake.isAlive) return;
 
-        // 1. Update Ular Pemain
         playerSnake.update();
-        updateCamera(); // Update kamera setelah pemain bergerak
+        updateCamera();
         scoreDisplay.textContent = `Skor: ${score}`;
 
-        // 2. Update NPC
         npcSNAKES.forEach(npc => npc.update());
 
-        // 3. Cek Makan Buah
         for (let i = foods.length - 1; i >= 0; i--) {
             const food = foods[i];
-            if (playerSnake.checkCollision(food)) {
+            // Cek tabrakan dengan ukuran buah
+            if (playerSnake.checkCollision(food, FOOD_SIZE / 2)) { 
                 foods.splice(i, 1);
                 playerSnake.grow(10); 
                 score += 10;
@@ -345,32 +332,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 4. Cek Tabrakan Ular (Pemain vs NPC)
         for (let i = npcSNAKES.length - 1; i >= 0; i--) {
             const npc = npcSNAKES[i];
             if (!npc.isAlive) continue;
 
-            // Pemain menabrak NPC
             if (playerSnake.checkBodyCollision(npc, false)) {
-                // Pemain kalah karena menabrak tubuh NPC
                 gameOver();
                 return;
             }
 
-            // NPC menabrak Pemain
             if (npc.checkBodyCollision(playerSnake, false)) {
-                // NPC mati, Pemain dapat skor
                 npc.isAlive = false;
                 score += Math.floor(npc.length / 2);
                 playerSnake.grow(Math.floor(npc.length / 4));
-                spawnNewNpc(npc); // Panggil respawn NPC
+                spawnNewNpc(npc);
             }
         }
 
-        // 5. Cleanup NPC yang mati karena border
         npcSNAKES = npcSNAKES.filter(npc => {
             if (!npc.isAlive && !npc.isPlayer) {
-                // Respawn jika mati karena border
                 spawnNewNpc(npc);
                 return false;
             }
@@ -379,37 +359,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function draw() {
-        // Hapus Canvas
         ctx.fillStyle = '#f0f0f0';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // --- Gambar Peta dengan Offset Kamera ---
         const offsetX = -cameraX;
         const offsetY = -cameraY;
 
-        // Gambar Border Peta
         ctx.strokeStyle = '#555';
         ctx.lineWidth = 10;
         ctx.strokeRect(0 + offsetX, 0 + offsetY, MAP_WIDTH, MAP_HEIGHT);
         
-        // Gambar Buah (diaplikasikan offset kamera)
+        // --- Gambar Buah (menggunakan gambar dummy) ---
         foods.forEach(food => {
-            let color;
-            switch (food.type) {
-                case 'apple': color = 'red'; break;
-                case 'banana': color = 'yellow'; break;
-                case 'strawberry': color = 'orange'; break;
+            const img = fruitImages[food.type];
+            if (img.complete) { // Pastikan gambar sudah dimuat
+                ctx.drawImage(img, food.x + offsetX - FOOD_SIZE / 2, food.y + offsetY - FOOD_SIZE / 2, FOOD_SIZE, FOOD_SIZE);
+            } else {
+                // Fallback jika gambar belum dimuat (gambar lingkaran sementara)
+                let color;
+                switch (food.type) {
+                    case 'apple': color = 'red'; break;
+                    case 'banana': color = 'yellow'; break;
+                    case 'strawberry': color = 'orange'; break;
+                }
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(food.x + offsetX, food.y + offsetY, FOOD_SIZE / 2, 0, Math.PI * 2);
+                ctx.fill();
             }
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(food.x + offsetX, food.y + offsetY, TILE_SIZE / 2, 0, Math.PI * 2);
-            ctx.fill();
         });
 
-        // Gambar NPC
         npcSNAKES.forEach(npc => npc.draw(cameraX, cameraY));
 
-        // Gambar Ular Pemain
         if (playerSnake.isAlive) {
             playerSnake.draw(cameraX, cameraY);
         }
@@ -424,10 +405,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Input dan Event Listeners ---
     playButton.addEventListener('click', startGame);
     restartButton.addEventListener('click', startGame);
-    homeButton.addEventListener('click', goToStartScreen); // Event Tombol HOME
+    homeButton.addEventListener('click', goToStartScreen);
     window.addEventListener('resize', resizeCanvas);
 
-    // 2. Joystick Virtual (Touch Events)
     joystickRegion.addEventListener('touchstart', (e) => {
         if (gameState !== 'playing') return;
         e.preventDefault();
@@ -446,13 +426,9 @@ document.addEventListener('DOMContentLoaded', () => {
     joystickRegion.addEventListener('touchend', (e) => {
         if (gameState !== 'playing') return;
         isDragging = false;
-        // Kembalikan handle ke tengah
         joystickHandle.style.transform = `translate(-50%, -50%)`;
-        // Jangan hentikan arah, ular tetap bergerak lurus
-        // playerSnake.direction = { x: 0, y: 0 }; 
     });
 
-    // 3. Tombol Boost (Touch Events)
     boostButton.addEventListener('touchstart', (e) => {
         e.preventDefault();
         if (gameState === 'playing' && playerSnake.isAlive) {
@@ -467,28 +443,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
-    // Logika Pergerakan Joystick
     function handleMove(touch) {
         let dx = touch.clientX - joystickCenter.x;
         let dy = touch.clientY - joystickCenter.y;
         
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // Batasi pergerakan handle
         if (distance > joystickRadius) {
             const angle = Math.atan2(dy, dx);
             dx = Math.cos(angle) * joystickRadius;
             dy = Math.sin(angle) * joystickRadius;
         }
 
-        // Pindahkan handle
         joystickHandle.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
 
-        // Update arah ular
         playerSnake.angle = Math.atan2(dy, dx);
     }
 
-    // Panggil resize awal
     resizeCanvas();
 });
