@@ -26,12 +26,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Konfigurasi Game Baru ---
     const MAP_WIDTH = 5000; 
     const MAP_HEIGHT = 5000;
-    const TILE_SIZE = 10; // Ukuran dasar elemen game (ular, buah)
+    const TILE_SIZE = 10; 
     const NORMAL_SPEED = 1.5; 
     const BOOST_SPEED = 4.5; 
-    const MAX_FOOD = 10000; // Jumlah buah (disesuaikan agar lebih banyak)
-    const NPC_COUNT = 1000; // Jumlah NPC (disesuaikan agar lebih banyak)
-    const FOOD_SIZE = TILE_SIZE * 2; // Ukuran buah agar lebih terlihat
+    
+    // Konfigurasi Buah
+    const MAX_NORMAL_FOOD = 10000; // Jumlah Buah Normal (Apple, Strawberry, Semangka, Pisang)
+    const MAX_SPECIAL_FOOD = 1000; // Jumlah Buah Spesial (Anggur)
+    const NORMAL_FOOD_POINT = 20; // Skor untuk buah normal
+    const SPECIAL_FOOD_POINT = 100; // Skor untuk Anggur (sesuai permintaan)
+    const GROWTH_PER_FOOD = 10;
+    const FOOD_SIZE = TILE_SIZE * 2; 
+
+    // Konfigurasi NPC
+    const NPC_COUNT = 800; // Jumlah NPC (disesuaikan agar lebih banyak)
+
 
     // Data Game
     let gameState = 'start';
@@ -60,24 +69,28 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Kira', score: 2600 }
     ];
 
-    // --- Link Gambar Dummy Buah ---
+    // --- Link Gambar Dummy Buah & Konfigurasi Spesial ---
     const fruitImages = {
         apple: new Image(),
+        strawberry: new Image(),
+        watermelon: new Image(),
         banana: new Image(),
-        strawberry: new Image()
+        grape: new Image()
     };
-    fruitImages.apple.src = 'https://i.imgur.com/kS55l1s.png'; // Contoh: Apple (ukuran kecil)
-    fruitImages.banana.src = 'https://i.imgur.com/c6B19G0.png'; // Contoh: Banana
-    fruitImages.strawberry.src = 'https://i.imgur.com/lM3N2f1.png'; // Contoh: Strawberry
-
-    // Jika link di atas tidak bekerja, coba link dummy lain dari placeholder:
-    // fruitImages.apple.src = 'https://via.placeholder.com/30/FF0000/FFFFFF?text=🍎';
-    // fruitImages.banana.src = 'https://via.placeholder.com/30/FFFF00/000000?text=🍌';
-    // fruitImages.strawberry.src = 'https://via.placeholder.com/30/FF4500/FFFFFF?text=🍓';
     
-    const fruitTypes = ['apple', 'banana', 'strawberry'];
+    // Menerapkan Link Gambar Baru (Blogger)
+    fruitImages.apple.src = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhz2lbPdFu35fGqG28J3hXwgw9K16s8AB5_DXAvUpqHrl5jTeug40hK0PWb4NZxmia8koxMxa8Mp9CY9lQiKrP-4ww1DBEvvEUl3qReLAJc-eHrbSvLgektE6TKf8VcYjiWWvqiH7hEUjUSdzybcnU5F5VmQmdVbJ6qtUOekHctQSvTnmMOZ3t88ZvFOZeu/s2560/quality_restoration_20251104100309133.png';
+    fruitImages.strawberry.src = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiBBLQyrJAXQjsq_5WUb4ERYwBTfxbDe7tAVxMAwaof_jXI9sv_7EpME6UIJqGVb3T-GmDOIBwf30dyXRMSoo97ye0BTpyK-1gto4BJfEfLSuQxRev1Fk18-4WRfQJBSGYhH0ArEtYCj3a6CwWe-kBPO3SQczbJs3IBbTvX6pOegE9i-7OqadwAhJK8aefF/s2560/quality_restoration_20251104100401287.png';
+    fruitImages.watermelon.src = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhvWesDNUDbi4zfp7AZAOJqypLsi50pR0_D9jupDYd5rXNVuwlo2ydkQ1ASxbnoq7Tkl4a9xJBHQOpQGFG6enUIJY2tRXmeTZ9qe5Muc99o_y_PXA4W_Zgjvn1WdgyDHUhoCgfWOfw9uGSCQNrZL5frRJA8SGjjZ1A9AztyOGluf7PmcZyaCtwkTUEkZMGD/s2560/quality_restoration_20251104100731738.png';
+    fruitImages.banana.src = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgn9wRw7fhpL1SuTHzwk4kxO0WOVTdjwOFxDLF5uvsNzLjK2jlqoOFV32Qd-pb12NQkfmAwjLi3g5AAugElIKf1b2Mf2P9d22Iu3gDwbCs2chNZcAhfWRJNJi2Qrb45RmD7sQCcMsFX7w9gTa1GLc8BYdSHeoviq_j-iZQuoAmtlKTI4v40BqI_u34typH0/s2560/quality_restoration_20251104100452661.png';
+    fruitImages.grape.src = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgmafDuKMcfOj6gMoIcdg9AzmEtqndD7nhWxfsuQeogHRueCncO9gOjMEKgLPM1EncbDEgP9d83pt34sdwMj8rK86GYatrF31DRbG3PLJ4UALov2xhwpy-KdaBBChrwpflPmgWu72U9_Addcbq5OiMTVGA5v8H-WFPHTs6n18aUx8kg-BA7rK6HnH3DcIPM/s2560/quality_restoration_20251104100609973.png';
+    
+    // Daftar tipe buah
+    const NORMAL_FRUIT_TYPES = ['apple', 'strawberry', 'watermelon', 'banana'];
+    const SPECIAL_FRUIT_TYPE = 'grape';
 
-    // --- Kelas Game (Snake) ---
+
+    // --- Kelas Game (Snake) --- (Tidak ada perubahan signifikan di sini)
     class Snake {
         constructor(x, y, color, isPlayer = false, initialLength = 100) {
             this.x = x;
@@ -165,13 +178,15 @@ document.addEventListener('DOMContentLoaded', () => {
             this.length += amount;
         }
 
-        checkCollision(point, radius = TILE_SIZE / 2) { // Tambah radius untuk cek tabrakan
+        // Cek tabrakan dengan radius (untuk buah)
+        checkCollision(point, radius = TILE_SIZE / 2) {
             const head = this.segments[this.segments.length - 1];
             const dx = head.x - point.x;
             const dy = head.y - point.y;
-            return Math.sqrt(dx * dx + dy * dy) < TILE_SIZE + radius; // Ukuran tabrakan disesuaikan
+            return Math.sqrt(dx * dx + dy * dy) < TILE_SIZE + radius; 
         }
 
+        // Cek tabrakan dengan tubuh ular lain
         checkBodyCollision(otherSnake, isSelfCollision = false) {
             const head = this.segments[this.segments.length - 1];
             const startIndex = isSelfCollision ? Math.floor(this.length * 0.7) : 0; 
@@ -203,16 +218,51 @@ document.addEventListener('DOMContentLoaded', () => {
             y: rect.top + rect.height / 2
         };
     }
-
-    function spawnFood(count) {
+    
+    // *** FUNGSI BARU: SPAWN BUAH NORMAL DAN SPESIAL ***
+    function spawnFood(count = 1) {
         for (let i = 0; i < count; i++) {
+            const isSpecial = Math.random() < 0.1 && getFoodCount(SPECIAL_FRUIT_TYPE) < MAX_SPECIAL_FOOD; // 10% chance untuk special food
+
+            let type;
+            if (isSpecial) {
+                type = SPECIAL_FRUIT_TYPE;
+            } else if (getFoodCount() < MAX_NORMAL_FOOD) {
+                type = NORMAL_FRUIT_TYPES[Math.floor(Math.random() * NORMAL_FRUIT_TYPES.length)];
+            } else {
+                continue; // Jangan spawn jika batas maksimum tercapai
+            }
+
             foods.push({
                 x: Math.random() * MAP_WIDTH,
                 y: Math.random() * MAP_HEIGHT,
-                type: fruitTypes[Math.floor(Math.random() * fruitTypes.length)]
+                type: type,
+                score: (type === SPECIAL_FRUIT_TYPE) ? SPECIAL_FOOD_POINT : NORMAL_FOOD_POINT
             });
         }
     }
+
+    function getFoodCount(type = null) {
+        if (type) {
+            return foods.filter(f => f.type === type).length;
+        }
+        return foods.filter(f => NORMAL_FRUIT_TYPES.includes(f.type)).length;
+    }
+    
+    function initialSpawnFood() {
+        // Spawn Buah Normal secara awal
+        spawnFood(MAX_NORMAL_FOOD); 
+        // Spawn Buah Spesial (misalnya 10 buah awal)
+        for(let i = 0; i < 10; i++) {
+            foods.push({
+                x: Math.random() * MAP_WIDTH,
+                y: Math.random() * MAP_HEIGHT,
+                type: SPECIAL_FRUIT_TYPE,
+                score: SPECIAL_FOOD_POINT
+            });
+        }
+    }
+    // *************************************************
 
     function spawnNpcSnakes() {
         npcSNAKES = [];
@@ -249,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playerSnake = new Snake(MAP_WIDTH / 2, MAP_HEIGHT / 2, playerColor, true, 100);
         
         foods = [];
-        spawnFood(MAX_FOOD);
+        initialSpawnFood(); // Gunakan initialSpawnFood baru
         spawnNpcSnakes();
 
         if (animationFrameId) {
@@ -321,17 +371,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         npcSNAKES.forEach(npc => npc.update());
 
+        // Cek Makan Buah
         for (let i = foods.length - 1; i >= 0; i--) {
             const food = foods[i];
-            // Cek tabrakan dengan ukuran buah
             if (playerSnake.checkCollision(food, FOOD_SIZE / 2)) { 
                 foods.splice(i, 1);
-                playerSnake.grow(10); 
-                score += 10;
+                playerSnake.grow(GROWTH_PER_FOOD); 
+                score += food.score; // Ambil skor dari objek buah
+                
+                // Spawn buah pengganti (1 buah)
                 spawnFood(1);
             }
         }
 
+        // Cek Tabrakan Ular (Pemain vs NPC)
         for (let i = npcSNAKES.length - 1; i >= 0; i--) {
             const npc = npcSNAKES[i];
             if (!npc.isAlive) continue;
@@ -356,6 +409,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return true;
         });
+        
+        // Cek jika jumlah buah spesial berkurang, tambahkan lagi
+        if (getFoodCount(SPECIAL_FRUIT_TYPE) < MAX_SPECIAL_FOOD) {
+             spawnFood(1); 
+        }
     }
 
     function draw() {
@@ -372,17 +430,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Gambar Buah (menggunakan gambar dummy) ---
         foods.forEach(food => {
             const img = fruitImages[food.type];
-            if (img.complete) { // Pastikan gambar sudah dimuat
+            // Karena gambar dari blogger mungkin butuh waktu loading
+            if (img.complete) { 
                 ctx.drawImage(img, food.x + offsetX - FOOD_SIZE / 2, food.y + offsetY - FOOD_SIZE / 2, FOOD_SIZE, FOOD_SIZE);
             } else {
-                // Fallback jika gambar belum dimuat (gambar lingkaran sementara)
-                let color;
-                switch (food.type) {
-                    case 'apple': color = 'red'; break;
-                    case 'banana': color = 'yellow'; break;
-                    case 'strawberry': color = 'orange'; break;
-                }
-                ctx.fillStyle = color;
+                // Fallback (lingkaran warna)
+                ctx.fillStyle = (food.type === 'grape') ? 'purple' : 'green';
                 ctx.beginPath();
                 ctx.arc(food.x + offsetX, food.y + offsetY, FOOD_SIZE / 2, 0, Math.PI * 2);
                 ctx.fill();
@@ -408,6 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
     homeButton.addEventListener('click', goToStartScreen);
     window.addEventListener('resize', resizeCanvas);
 
+    // [Kode Joystick dan Boost tetap sama...]
     joystickRegion.addEventListener('touchstart', (e) => {
         if (gameState !== 'playing') return;
         e.preventDefault();
