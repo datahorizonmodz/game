@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const BOOST_SPEED = 4.5; 
     
     // Konfigurasi Buah
-    const MAX_NORMAL_FOOD = 10000; // Jumlah Buah Normal (Apple, Strawberry, Semangka, Pisang)
+    const MAX_NORMAL_FOOD = 7000; // Jumlah Buah Normal (Apple, Strawberry, Semangka, Pisang)
     const MAX_SPECIAL_FOOD = 1000; // Jumlah Buah Spesial (Anggur)
     const NORMAL_FOOD_POINT = 20; // Skor untuk buah normal
     const SPECIAL_FOOD_POINT = 100; // Skor untuk Anggur (sesuai permintaan)
