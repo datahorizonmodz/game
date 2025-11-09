@@ -61,11 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let joystickCenter = { x: 0, y: 0 };
     let joystickRadius = 50; 
     
-    // --- STATUS INPUT DESKTOP BARU ---
+    // --- STATUS INPUT DESKTOP ---
     let isKeyPressed = false; // Untuk WASD/Panah
-    let mousePosition = { x: 0, y: 0 }; // Untuk kontrol mouse
+    // Variabel mousePosition Dihilangkan
     const activeKeys = new Set(); // Melacak tombol WASD/Panah yang sedang ditekan
-    // -----------------------------------
+    // ---------------------------
 
 
     // Leaderboard Dummy
@@ -278,7 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     tongueTipX + Math.cos(perpAngle - Math.PI) * tongueSpread, 
                     tongueTipY + Math.sin(perpAngle - Math.PI) * tongueSpread
                 );
-                // Garis kembali ke pangkal
                 ctx.closePath();
                 ctx.fill();
             }
@@ -406,6 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playerNameDisplay.textContent = playerName;
         resizeCanvas();
 
+        // Ular Pemain dimulai di tengah peta
         playerSnake = new Snake(MAP_WIDTH / 2, MAP_HEIGHT / 2, playerColor, true, 100);
         
         foods = [];
@@ -469,36 +469,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const smoothing = 0.1;
         cameraX += (targetX - cameraX) * smoothing;
+        cameraY += (targetY - targetY) * smoothing; // Perbaikan: Gunakan targetY
+        // Perbaikan di atas sudah diganti menjadi:
         cameraY += (targetY - cameraY) * smoothing;
     }
 
     function update() {
         if (gameState !== 'playing' || !playerSnake.isAlive) return;
         
-        // --- LOGIKA KONTROL DESKTOP ---
+        // --- LOGIKA KONTROL INPUT ---
+        // Mouse control DIHILANGKAN.
+        // Jika Joystick aktif (isDragging), sudut diatur di handleMove (Prioritas 1).
         if (isDragging) {
-            // Priority 1: Joystick/Touch (Sudut diatur di handleMove)
-            isKeyPressed = false; // Nonaktifkan keyboard saat joystick aktif
-        } else if (isKeyPressed) {
-            // Priority 2: Keyboard WASD/Panah (Sudut diatur di keydown)
-            // Lanjutkan menggunakan sudut yang dihitung dari input keyboard
-        } else {
-            // Priority 3: Mouse Movement (Hanya jika tidak ada input lain aktif)
-            // Hitung arah ke kursor mouse
-            const canvasRect = canvas.getBoundingClientRect();
-            const centerX = canvas.width / 2; // Pusat Canvas
-            const centerY = canvas.height / 2;
-            
-            // Konversi koordinat mouse ke koordinat relatif canvas
-            const mouseX = mousePosition.x - canvasRect.left;
-            const mouseY = mousePosition.y - canvasRect.top;
-
-            const dx = mouseX - centerX;
-            const dy = mouseY - centerY;
-            
-            // Atur sudut ular berdasarkan mouse
-            playerSnake.angle = Math.atan2(dy, dx);
-        }
+            // Nonaktifkan keyboard saat joystick aktif
+            isKeyPressed = false; 
+        } 
+        // Jika Keyboard aktif (isKeyPressed), sudut diatur di keydown (Prioritas 2).
+        // Jika keduanya (Joystick/Keyboard) tidak aktif, ular mempertahankan sudutnya saat ini.
         // -----------------------------
 
 
@@ -653,16 +640,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- KONTROL DESKTOP (MOUSE & KEYBOARD) BARU ---
+    // --- KONTROL DESKTOP (KEYBOARD) ---
     
-    // 1. Listener Mouse (Untuk Kontrol Arah)
-    canvas.addEventListener('mousemove', (e) => {
-        // Simpan posisi mouse global
-        mousePosition.x = e.clientX; 
-        mousePosition.y = e.clientY;
-    });
-
-
+    // Listener Mouse DIHILANGKAN
+    
     // 2. Listener Keyboard (WASD, Panah, SPACE)
     const KEY_MAP = {
         // Sudut dalam radian (0 = Kanan/D, -PI/2 = Atas/W, PI/2 = Bawah/S, PI = Kiri/A)
@@ -727,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeKeys.size === 0) {
                 isKeyPressed = false; // Nonaktifkan flag jika semua tombol dilepas
             } else {
-                // Panggil keydown untuk menghitung ulang sudut (misal, dari W+D menjadi hanya W)
+                // Panggil keydown untuk menghitung ulang sudut jika tombol lain masih ditekan
                 const remainingKey = Array.from(activeKeys)[0];
                 window.dispatchEvent(new KeyboardEvent('keydown', { key: remainingKey }));
             }
