@@ -469,9 +469,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const smoothing = 0.1;
         cameraX += (targetX - cameraX) * smoothing;
-        cameraY += (targetY - targetY) * smoothing; // Perbaikan: Gunakan targetY
-        // Perbaikan di atas sudah diganti menjadi:
-        cameraY += (targetY - cameraY) * smoothing;
+        // PERBAIKAN PENTING: Gunakan targetY di sini!
+        cameraY += (targetY - cameraY) * smoothing; 
     }
 
     function update() {
