@@ -31,15 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const BOOST_SPEED = 4.5; 
     
     // Konfigurasi Buah
-    const MAX_NORMAL_FOOD = 5000; // Jumlah Buah Normal (Apple, Strawberry, Semangka, Pisang)
-    const MAX_SPECIAL_FOOD = 1000; // Jumlah Buah Spesial (Anggur)
-    const NORMAL_FOOD_POINT = 50; // Skor untuk buah normal
-    const SPECIAL_FOOD_POINT = 150; // Skor untuk Anggur (sesuai permintaan)
+    const MAX_NORMAL_FOOD = 5000; 
+    const MAX_SPECIAL_FOOD = 1000; 
+    const NORMAL_FOOD_POINT = 50; 
+    const SPECIAL_FOOD_POINT = 150; 
     const GROWTH_PER_FOOD = 10;
     const FOOD_SIZE = TILE_SIZE * 2; 
 
     // Konfigurasi NPC
-    const NPC_COUNT = 800; // Jumlah NPC (disesuaikan agar lebih banyak)
+    const NPC_COUNT = 800; 
 
 
     // Data Game
@@ -62,9 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let joystickRadius = 50; 
     
     // --- STATUS INPUT DESKTOP ---
-    let isKeyPressed = false; // Untuk WASD/Panah
-    // Variabel mousePosition Dihilangkan
-    const activeKeys = new Set(); // Melacak tombol WASD/Panah yang sedang ditekan
+    let isKeyPressed = false; 
+    const activeKeys = new Set(); 
     // ---------------------------
 
 
@@ -76,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Kira', score: 2600 }
     ];
 
-    // --- Link Gambar Dummy Buah & Konfigurasi Spesial ---
+    // --- Link Gambar Buah DIBUAT ANDAL (Mengganti URL Blogger yang Bermasalah) ---
     const fruitImages = {
         apple: new Image(),
         strawberry: new Image(),
@@ -85,12 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
         grape: new Image()
     };
     
-    // Menerapkan Link Gambar Baru (Blogger)
-    fruitImages.apple.src = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhz2lbPdFu35fGqG28J3hXwgw9K16s8AB5_DXAvUpqHrl5jTeug40hK0PWb4NZxmia8koxMxa8Mp9CY9lQiKrP-4ww1DBEvvEUl3qReLAJc-eHrbSvLgektE6TKf8VcYjiWWvqiH7hEUjUSdzybcnU5F5VmQmdVbJ6qtUOekHctQSvTnmMOZ3t88ZvFOZeu/s2560/quality_restoration_20251104100309133.png';
-    fruitImages.strawberry.src = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiBBLQyrJAXQjsq_5WUb4ERYwBTfxbDe7tAVxMAwaof_jXI9sv_7EpME6UIJqGVb3T-GmDOIBwf30dyXRMSoo97ye0BTpyK-1gto4BJfEfLSuQxRev1Fk18-4WRfQJBSGYhH0ArEtYCj3a6CwWe-kBPO3SQczbJs3IBbTvX6pOegE9i-7OqadwAhJK8aefF/s2560/quality_restoration_20251104100401287.png';
-    fruitImages.watermelon.src = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhvWesDNUDbi4zfp7AZAOJqypLsi50pR0_D9jupDYd5rXNVuwlo2ydkQ1ASxbnoq7Tkl4a9xJBHQOpQGFG6GenUIJY2tRXmeTZ9qe5Muc99o_y_PXA4W_Zgjvn1WdgyDHUhoCgfWOfw9uGSCQNrZL5frRJA8SGjjZ1A9AztyOGluf7PmcZyaCtwkTUEkZMGD/s2560/quality_restoration_20251104100731738.png';
-    fruitImages.banana.src = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgn9wRw7fhpL1SuTHzwk4kxO0WOVTdjwOFxDLF5uvsNzLjK2jlqoOFV32Qd-pb12NQkfmAwjLi3g5AAugElIKf1b2Mf2P9d22Iu3gDwbCs2chNZcAhfWRJNJi2Qrb45RmD7sQCcMsFX7w9gTa1GLc8BYdSHeoviq_j-iZQuoAmtlKTI4v40BqI_u34typH0/s2560/quality_restoration_20251104100452661.png';
-    fruitImages.grape.src = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgmafDuKMcfOj6gMoIcdg9AzmEtqndD7nhWxfsuQeogHRueCncO9gOjMEKgLPM1EncbDEgP9d83pt34sdwMj8rK86GYatrF31DRbG3PLJ4UALov2xhwpy-KdaBBChrwpflPmgWu72U9_Addcbq5OiMTVGA5v8H-WFPHTs6n18aUx8kg-BA7rK6HnH3DcIPM/s2560/quality_restoration_20251104100609973.png';
+    // Menggunakan URL Placeholder yang Andal
+    fruitImages.apple.src = 'https://placehold.co/40x40/FF6347/FFFFFF?text=A';
+    fruitImages.strawberry.src = 'https://placehold.co/40x40/FFC0CB/000000?text=S';
+    fruitImages.watermelon.src = 'https://placehold.co/40x40/228B22/FFFFFF?text=W';
+    fruitImages.banana.src = 'https://placehold.co/40x40/FFFF00/000000?text=B';
+    fruitImages.grape.src = 'https://placehold.co/40x40/800080/FFFFFF?text=G';
     
     // Daftar tipe buah
     const NORMAL_FRUIT_TYPES = ['apple', 'strawberry', 'watermelon', 'banana'];
@@ -461,15 +460,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Loop Game ---
 
     function updateCamera() {
+        // Target kamera adalah tengah layar, berpusat pada ular
         let targetX = playerSnake.x - canvas.width / 2;
         let targetY = playerSnake.y - canvas.height / 2;
 
+        // Batasi target agar kamera tidak keluar dari batas peta
         targetX = Math.max(0, Math.min(targetX, MAP_WIDTH - canvas.width));
         targetY = Math.max(0, Math.min(targetY, MAP_HEIGHT - canvas.height));
 
         const smoothing = 0.1;
+        // PERBAIKAN BUG KAMERA: Memastikan target yang benar digunakan untuk smoothing
         cameraX += (targetX - cameraX) * smoothing;
-        // PERBAIKAN PENTING: Gunakan targetY di sini!
         cameraY += (targetY - cameraY) * smoothing; 
     }
 
@@ -477,14 +478,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameState !== 'playing' || !playerSnake.isAlive) return;
         
         // --- LOGIKA KONTROL INPUT ---
-        // Mouse control DIHILANGKAN.
-        // Jika Joystick aktif (isDragging), sudut diatur di handleMove (Prioritas 1).
+        // Mouse control DIHILANGKAN. Prioritas hanya pada Joystick/Touch atau Keyboard.
         if (isDragging) {
-            // Nonaktifkan keyboard saat joystick aktif
             isKeyPressed = false; 
         } 
-        // Jika Keyboard aktif (isKeyPressed), sudut diatur di keydown (Prioritas 2).
-        // Jika keduanya (Joystick/Keyboard) tidak aktif, ular mempertahankan sudutnya saat ini.
         // -----------------------------
 
 
@@ -550,22 +547,13 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineWidth = 10;
         ctx.strokeRect(0 + offsetX, 0 + offsetY, MAP_WIDTH, MAP_HEIGHT);
         
-        // --- Gambar Buah (menggunakan gambar dummy) ---
+        // --- Gambar Buah (Menggunakan gambar placeholder yang andal) ---
         foods.forEach(food => {
             const img = fruitImages[food.type];
-            // Karena gambar dari blogger mungkin butuh waktu loading
-            if (img.complete) { 
-                ctx.drawImage(img, food.x + offsetX - FOOD_SIZE / 2, food.y + offsetY - FOOD_SIZE / 2, FOOD_SIZE, FOOD_SIZE);
-            } else {
-                // Fallback (lingkaran warna)
-                ctx.fillStyle = (food.type === 'grape') ? 'purple' : 'green';
-                ctx.beginPath();
-                ctx.arc(food.x + offsetX, food.y + offsetY, FOOD_SIZE / 2, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            ctx.drawImage(img, food.x + offsetX - FOOD_SIZE / 2, food.y + offsetY - FOOD_SIZE / 2, FOOD_SIZE, FOOD_SIZE);
         });
 
-        // Gambar NPC dan Ular Pemain (memanggil draw() yang sudah dimodifikasi)
+        // Gambar NPC dan Ular Pemain
         npcSNAKES.forEach(npc => npc.draw(cameraX, cameraY));
 
         if (playerSnake.isAlive) {
@@ -641,11 +629,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- KONTROL DESKTOP (KEYBOARD) ---
     
-    // Listener Mouse DIHILANGKAN
-    
     // 2. Listener Keyboard (WASD, Panah, SPACE)
     const KEY_MAP = {
-        // Sudut dalam radian (0 = Kanan/D, -PI/2 = Atas/W, PI/2 = Bawah/S, PI = Kiri/A)
         'w': -Math.PI / 2, 'W': -Math.PI / 2, 'ArrowUp': -Math.PI / 2,
         's': Math.PI / 2, 'S': Math.PI / 2, 'ArrowDown': Math.PI / 2,
         'a': Math.PI, 'A': Math.PI, 'ArrowLeft': Math.PI,
@@ -667,7 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (KEY_MAP.hasOwnProperty(key)) {
             e.preventDefault();
             activeKeys.add(key);
-            isKeyPressed = true; // Set flag input keyboard aktif
+            isKeyPressed = true; 
             
             // Menghitung Sudut Gabungan untuk 8 Arah
             let angle = 0;
